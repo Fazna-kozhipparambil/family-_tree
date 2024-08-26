@@ -1,37 +1,18 @@
 import streamlit as st
-import pandas as pd
 from datetime import datetime
 
 # Set page configuration
-st.set_page_config(page_title="Family Tree", layout="wide")
-
-# Add custom CSS for styling
-st.markdown("""
-<style>
-.header {
-    font-size: 2em;
-    color: #FF6347;
-    text-align: center;
-}
-.container {
-    display: flex;
-    justify-content: space-around;
-    padding: 10px;
-}
-</style>
-""", unsafe_allow_html=True)
+st.set_page_config(page_title="Family Tree Planner", layout="wide")
 
 # Title of the app
-st.title("Family Tree")
+st.title("Family Tree Planner")
 
 # User credentials (in a real app, store and handle these securely)
 USER_CREDENTIALS = {"parent1": "password1", "parent2": "password2"}
 
 # Function to handle login
 def login(username, password):
-    if USER_CREDENTIALS.get(username) == password:
-        return True
-    return False
+    return USER_CREDENTIALS.get(username) == password
 
 # Login section
 if "logged_in" not in st.session_state:
@@ -50,6 +31,9 @@ if not st.session_state.logged_in:
 else:
     st.sidebar.success("You are logged in!")
 
+    # Debugging statement to confirm successful login
+    st.write("Login successful, displaying main content...")
+
     # Sidebar for navigation
     st.sidebar.title("Navigation")
     option = st.sidebar.selectbox(
@@ -57,15 +41,8 @@ else:
         ["Home", "Household Chores", "Meal Plan", "Daily Tasks", "Health Monitor", "Calendar"]
     )
 
-    # Define initial data for demo purposes
-    if 'tasks' not in st.session_state:
-        st.session_state.tasks = pd.DataFrame(columns=["Task", "Priority", "Status", "Assigned To"])
-
-    if 'chores' not in st.session_state:
-        st.session_state.chores = pd.DataFrame(columns=["Chore", "Assigned To"])
-
-    if 'meals' not in st.session_state:
-        st.session_state.meals = pd.DataFrame(columns=["Meal", "Day"])
+    # Debugging statement to confirm selected option
+    st.write(f"Selected option: {option}")
 
     # Main content based on selected option
     if option == "Home":
@@ -80,6 +57,8 @@ else:
                 assigned_to = st.text_input("Assign To")
                 submit_button = st.form_submit_button("Add Chore")
                 if submit_button:
+                    if 'chores' not in st.session_state:
+                        st.session_state.chores = pd.DataFrame(columns=["Chore", "Assigned To"])
                     st.session_state.chores = st.session_state.chores.append({"Chore": chore, "Assigned To": assigned_to}, ignore_index=True)
                     st.write(f"Chore Added: {chore} for {assigned_to}")
             st.dataframe(st.session_state.chores)
@@ -92,6 +71,8 @@ else:
                 day = st.text_input("Day of the Week")
                 submit_button = st.form_submit_button("Add Meal")
                 if submit_button:
+                    if 'meals' not in st.session_state:
+                        st.session_state.meals = pd.DataFrame(columns=["Meal", "Day"])
                     st.session_state.meals = st.session_state.meals.append({"Meal": meal, "Day": day}, ignore_index=True)
                     st.write(f"Meal Added: {meal} for {day}")
             st.dataframe(st.session_state.meals)
@@ -106,6 +87,8 @@ else:
                 status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
                 submit_button = st.form_submit_button("Add Task")
                 if submit_button:
+                    if 'tasks' not in st.session_state:
+                        st.session_state.tasks = pd.DataFrame(columns=["Task", "Priority", "Status", "Assigned To"])
                     st.session_state.tasks = st.session_state.tasks.append({
                         "Task": task, 
                         "Priority": priority, 
@@ -119,35 +102,36 @@ else:
         with st.expander("Health Monitor"):
             st.header("Health Monitor")
             st.write("Health monitoring features will be here.")
-            # Placeholder for health monitoring code
+            # Add any health monitoring code or placeholders here
 
     elif option == "Calendar":
         with st.expander("Calendar"):
             st.header("Calendar")
             st.write(f"Today's date: {datetime.now().strftime('%Y-%m-%d')}")
+            # Implement calendar functionality here or use Streamlit's date input
             date_selected = st.date_input("Select a date", datetime.now())
             st.write(f"Selected date: {date_selected}")
 
     # Additional: Rewards System for Kids (Placeholder)
     with st.sidebar.expander("Rewards System"):
-        if st.session_state.tasks.shape[0] > 0:
+        if 'tasks' in st.session_state and st.session_state.tasks.shape[0] > 0:
             completed_tasks = st.session_state.tasks[st.session_state.tasks["Status"] == "Completed"]
             if len(completed_tasks) > 0:
                 st.write(f"Number of tasks completed: {len(completed_tasks)}")
                 st.write("Rewards can be set based on the number of completed tasks.")
 
-    # Footer
-    st.markdown("""
-    <style>
-    .header {
-        font-size: 2em;
-        color: #FF6347;
-        text-align: center;
-    }
-    .container {
-        display: flex;
-        justify-content: space-around;
-        padding: 10px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+# Add custom CSS for styling
+st.markdown("""
+<style>
+.header {
+    font-size: 2em;
+    color: #FF6347;
+    text-align: center;
+}
+.container {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+}
+</style>
+""", unsafe_allow_html=True)
