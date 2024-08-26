@@ -1,6 +1,27 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import streamlit as st
+
+# Add custom CSS for styling
+st.markdown("""
+<style>
+.header {
+    font-size: 2em;
+    color: #FF6347;
+    text-align: center;
+}
+.container {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Your existing Streamlit code
+st.title("Family Tree Planner")
+
 
 # Set up the page configuration
 st.set_page_config(page_title="Family Tree", layout="wide")
@@ -33,97 +54,113 @@ else:
     
     # Title of the app
     st.title('Family Tree')
+    import streamlit as st
+from datetime import datetime
+import pandas as pd
 
-    # Sidebar for navigation
-    section = st.sidebar.selectbox("Select a section", ["Chores", "Meal Plan", "Tasks", "Reminders", "Health Monitor", "Calendar"])
+# Title
+st.title("Family Tree Planner")
 
-    # Date selector
-    selected_date = st.sidebar.date_input("Select a date", datetime.today())
+# Sidebar for navigation
+st.sidebar.title("Navigation")
+option = st.sidebar.selectbox(
+    "Select a section:",
+    ["Home", "Household Chores", "Meal Plan", "Daily Tasks", "Health Monitor", "Calendar"]
+)
 
-    # Dictionary to hold the data
-    data = {
-        "chores": [],
-        "meal_plan": [],
-        "tasks": [],
-        "reminders": [],
-        "health_monitor": []
-    }
+# Define initial data for demo purposes
+if 'tasks' not in st.session_state:
+    st.session_state.tasks = pd.DataFrame(columns=["Task", "Priority", "Status", "Assigned To"])
 
-    # Helper function to add, edit, delete entries and update status
-    def manage_entries(entry_type):
-        st.header(f"{entry_type.capitalize()} for {selected_date}")
-        
-        if entry_type not in data:
-            data[entry_type] = []
-        
-        # Show existing entries with date, time, and status
-        for i, entry in enumerate(data[entry_type]):
-            status = "✅" if entry['status'] == "Completed" else "❌"
-            st.write(f"{entry['description']} - {entry['time']} ({entry['date']}) - Status: {status}")
-            
-            if st.button(f"Mark as Completed - {entry['description']}", key=f"complete_{entry_type}_{i}"):
-                entry['status'] = "Completed"
-                st.success(f"{entry_type.capitalize()} marked as completed!")
-                
-            if entry_type == "tasks" and entry['status'] == "Completed":
-                if st.button(f"Claim Reward - {entry['description']}", key=f"reward_{entry_type}_{i}"):
-                    st.success(f"Reward claimed for completing {entry['description']}!")
+if 'chores' not in st.session_state:
+    st.session_state.chores = pd.DataFrame(columns=["Chore", "Assigned To"])
 
-            if st.button(f"Delete {entry['description']}", key=f"del_{entry_type}_{i}"):
-                data[entry_type].pop(i)
-        
-        # Add a new entry   
-        st.subheader(f"Add new {entry_type}")
-        description = st.text_input(f"{entry_type.capitalize()} description")
-        time = st.time_input(f"Time for the {entry_type}")
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        if st.button(f"Add {entry_type}"):
-            data[entry_type].append({
-                "description": description, 
-                "time": time.strftime("%H:%M"),
-                "date": current_time,
-                "status": "Pending"
-            })
-            st.success(f"{entry_type.capitalize()} added!")
+if 'meals' not in st.session_state:
+    st.session_state.meals = pd.DataFrame(columns=["Meal", "Day"])
 
-    if section == "Chores":
-        manage_entries("chores")
-    elif section == "Meal Plan":
-        st.header(f"Meal Plan for {selected_date}")
-        st.subheader("Meal Ideas")
-        meal_ideas = ["Pancakes", "Salad", "Pasta", "Soup", "Grilled Chicken"]
-        st.write(", ".join(meal_ideas))
+# Main content based on selected option
+if option == "Home":
+    st.header("Welcome to the Family Tree Planner")
+    st.write("Manage your family's daily routines, meals, tasks, and more.")
 
-        manage_entries("meal_plan")
-    elif section == "Tasks":
-        manage_entries("tasks")
-    elif section == "Reminders":
-        manage_entries("reminders")
-    elif section == "Health Monitor":
-        st.header(f"Health Monitor for {selected_date}")
-        weight = st.number_input("Weight (kg)", min_value=0, step=1)
-        sleep_hours = st.number_input("Sleep (hours)", min_value=0, step=1)
-        if st.button("Save Health Data"):
-            data["health_monitor"].append({
-                "weight": weight,
-                "sleep_hours": sleep_hours,
-                "date": selected_date.strftime("%Y-%m-%d")
-            })
-            st.success("Health data saved!")
-        
-        if data["health_monitor"]:
-            st.subheader("Health Data")
-            df = pd.DataFrame(data["health_monitor"])
-            st.table(df)
-        
-    elif section == "Calendar":
+elif option == "Household Chores":
+    with st.expander("Household Chores"):
+        st.header("Household Chores")
+        with st.form(key='chores_form'):
+            chore = st.text_input("Chore Description")
+            assigned_to = st.text_input("Assign To")
+            submit_button = st.form_submit_button("Add Chore")
+            if submit_button:
+                st.session_state.chores = st.session_state.chores.append({"Chore": chore, "Assigned To": assigned_to}, ignore_index=True)
+                st.write(f"Chore Added: {chore} for {assigned_to}")
+        st.dataframe(st.session_state.chores)
+
+elif option == "Meal Plan":
+    with st.expander("Meal Plan"):
+        st.header("Meal Plan")
+        with st.form(key='meal_form'):
+            meal = st.text_input("Meal Description")
+            day = st.text_input("Day of the Week")
+            submit_button = st.form_submit_button("Add Meal")
+            if submit_button:
+                st.session_state.meals = st.session_state.meals.append({"Meal": meal, "Day": day}, ignore_index=True)
+                st.write(f"Meal Added: {meal} for {day}")
+        st.dataframe(st.session_state.meals)
+
+elif option == "Daily Tasks":
+    with st.expander("Daily Tasks"):
+        st.header("Daily Tasks")
+        with st.form(key='tasks_form'):
+            task = st.text_input("Task Description")
+            priority = st.slider("Priority", 1, 10)
+            assigned_to = st.text_input("Assign To")
+            status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
+            submit_button = st.form_submit_button("Add Task")
+            if submit_button:
+                st.session_state.tasks = st.session_state.tasks.append({
+                    "Task": task, 
+                    "Priority": priority, 
+                    "Status": status, 
+                    "Assigned To": assigned_to
+                }, ignore_index=True)
+                st.write(f"Task Added: {task} with Priority {priority} for {assigned_to}")
+        st.dataframe(st.session_state.tasks)
+
+elif option == "Health Monitor":
+    with st.expander("Health Monitor"):
+        st.header("Health Monitor")
+        st.write("Health monitoring features will be here.")
+        # Add any health monitoring code or placeholders here
+
+elif option == "Calendar":
+    with st.expander("Calendar"):
         st.header("Calendar")
-        # For now, display a simple text
-        st.write("Calendar view to be implemented...")
+        st.write(f"Today's date: {datetime.now().strftime('%Y-%m-%d')}")
+        # Implement calendar functionality here or use Streamlit's date input
+        date_selected = st.date_input("Select a date", datetime.now())
+        st.write(f"Selected date: {date_selected}")
 
-    # Reminder Notification (Placeholder)
-    if st.sidebar.button("Check for Reminders"):
-        st.sidebar.write("🔔 Reminder: Check the tasks for today!")
+# Additional: Rewards System for Kids (Placeholder)
+with st.sidebar.expander("Rewards System"):
+    if st.session_state.tasks.shape[0] > 0:
+        completed_tasks = st.session_state.tasks[st.session_state.tasks["Status"] == "Completed"]
+        if len(completed_tasks) > 0:
+            st.write(f"Number of tasks completed: {len(completed_tasks)}")
+            st.write("Rewards can be set based on the number of completed tasks.")
 
-
+# Footer
+st.markdown("""
+<style>
+.header {
+    font-size: 2em;
+    color: #FF6347;
+    text-align: center;
+}
+.container {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+}
+</style>
+""", unsafe_allow_html=True)
 
