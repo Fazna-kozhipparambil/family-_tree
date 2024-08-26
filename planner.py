@@ -1,137 +1,132 @@
+import streamlit as st
+import pandas as pd
+from datetime import datetime
 
-        "import streamlit as st\n",
-        "import pandas as pd\n",
-        "from datetime import datetime\n",
-        "\n",
-        "# Set page configuration\n",
-        "st.set_page_config(page_title=\"Family Tree Planner\", layout=\"wide\")\n",
-        "\n",
-        "# Add custom CSS for styling\n",
-        "st.markdown(\"\"\"\n",
-        "<style>\n",
-        ".header {\n",
-        "    font-size: 2em;\n",
-        "    color: #FF6347;\n",
-        "    text-align: center;\n",
-        "}\n",
-        ".container {\n",
-        "    display: flex;\n",
-        "    justify-content: space-around;\n",
-        "    padding: 10px;\n",
-        "}\n",
-        "</style>\n",
-        "\"\"\", unsafe_allow_html=True)\n",
-        "\n",
-        "# Title of the app\n",
-        "st.title('Family Tree Planner')\n",
-        "\n",
-        "# User credentials (in a real app, store securely)\n",
-        "USER_CREDENTIALS = {\"parent1\": \"password1\", \"parent2\": \"password2\"}\n",
-        "\n",
-        "# Function to handle login\n",
-        "def login(username, password):\n",
-        "    return USER_CREDENTIALS.get(username) == password\n",
-        "\n",
-        "# Login section\n",
-        "if \"logged_in\" not in st.session_state:\n",
-        "    st.session_state.logged_in = False\n",
-        "\n",
-        "if not st.session_state.logged_in:\n",
-        "    st.sidebar.title(\"Login\")\n",
-        "    username = st.sidebar.text_input(\"Username\")\n",
-        "    password = st.sidebar.text_input(\"Password\", type=\"password\")\n",
-        "    if st.sidebar.button(\"Login\"):\n",
-        "        if login(username, password):\n",
-        "            st.session_state.logged_in = True\n",
-        "            st.sidebar.success(\"Logged in successfully!\")\n",
-        "        else:\n",
-        "            st.sidebar.error(\"Invalid username or password\")\n",
-        "else:\n",
-        "    st.sidebar.success(\"You are logged in!\")\n",
-        "\n",
-        "    # Initialize session state DataFrames if they do not exist\n",
-        "    if 'tasks' not in st.session_state:\n",
-        "        st.session_state.tasks = pd.DataFrame(columns=[\"Task\", \"Priority\", \"Status\", \"Assigned To\"])\n",
-        "    if 'chores' not in st.session_state:\n",
-        "        st.session_state.chores = pd.DataFrame(columns=[\"Chore\", \"Assigned To\"])\n",
-        "    if 'meals' not in st.session_state:\n",
-        "        st.session_state.meals = pd.DataFrame(columns=[\"Meal\", \"Day\"])\n",
-        "\n",
-        "    # Sidebar for navigation\n",
-        "    st.sidebar.title(\"Navigation\")\n",
-        "    option = st.sidebar.selectbox(\n",
-        "        \"Select a section:\",\n",
-        "        [\"Home\", \"Household Chores\", \"Meal Plan\", \"Daily Tasks\", \"Health Monitor\", \"Calendar\"]\n",
-        "    )\n",
-        "\n",
-        "    # Main content based on selected option\n",
-        "    if option == \"Home\":\n",
-        "        st.header(\"Welcome to the Family Tree Planner\")\n",
-        "        st.write(\"Manage your family's daily routines, meals, tasks, and more.\")\n",
-        "\n",
-        "    elif option == \"Household Chores\":\n",
-        "        with st.expander(\"Household Chores\"):\n",
-        "            st.header(\"Household Chores\")\n",
-        "            with st.form(key='chores_form'):\n",
-        "                chore = st.text_input(\"Chore Description\")\n",
-        "                assigned_to = st.text_input(\"Assign To\")\n",
-        "                submit_button = st.form_submit_button(\"Add Chore\")\n",
-        "                if submit_button:\n",
-        "                    st.session_state.chores = st.session_state.chores.append({\"Chore\": chore, \"Assigned To\": assigned_to}, ignore_index=True)\n",
-        "                    st.write(f\"Chore Added: {chore} for {assigned_to}\")\n",
-        "            st.dataframe(st.session_state.chores)\n",
-        "\n",
-        "    elif option == \"Meal Plan\":\n",
-        "        with st.expander(\"Meal Plan\"):\n",
-        "            st.header(\"Meal Plan\")\n",
-        "            with st.form(key='meal_form'):\n",
-        "                meal = st.text_input(\"Meal Description\")\n",
-        "                day = st.text_input(\"Day of the Week\")\n",
-        "                submit_button = st.form_submit_button(\"Add Meal\")\n",
-        "                if submit_button:\n",
-        "                    st.session_state.meals = st.session_state.meals.append({\"Meal\": meal, \"Day\": day}, ignore_index=True)\n",
-        "                    st.write(f\"Meal Added: {meal} for {day}\")\n",
-        "            st.dataframe(st.session_state.meals)\n",
-        "\n",
-        "    elif option == \"Daily Tasks\":\n",
-        "        with st.expander(\"Daily Tasks\"):\n",
-        "            st.header(\"Daily Tasks\")\n",
-        "            with st.form(key='tasks_form'):\n",
-        "                task = st.text_input(\"Task Description\")\n",
-        "                priority = st.slider(\"Priority\", 1, 10)\n",
-        "                assigned_to = st.text_input(\"Assign To\")\n",
-        "                status = st.selectbox(\"Status\", [\"Not Started\", \"In Progress\", \"Completed\"])\n",
-        "                submit_button = st.form_submit_button(\"Add Task\")\n",
-        "                if submit_button:\n",
-        "                    st.session_state.tasks = st.session_state.tasks.append({\n",
-        "                        \"Task\": task,\n",
-        "                        \"Priority\": priority,\n",
-        "                        \"Status\": status,\n",
-        "                        \"Assigned To\": assigned_to\n",
-        "                    }, ignore_index=True)\n",
-        "                    st.write(f\"Task Added: {task} with Priority {priority} for {assigned_to}\")\n",
-        "            st.dataframe(st.session_state.tasks)\n",
-        "\n",
-        "    elif option == \"Health Monitor\":\n",
-        "        with st.expander(\"Health Monitor\"):\n",
-        "            st.header(\"Health Monitor\")\n",
-        "            st.write(\"Health monitoring features will be here.\")\n",
-        "\n",
-        "    elif option == \"Calendar\":\n",
-        "        with st.expander(\"Calendar\"):\n",
-        "            st.header(\"Calendar\")\n",
-        "            st.write(f\"Today's date: {datetime.now().strftime('%Y-%m-%d')}\")\n",
-        "            date_selected = st.date_input(\"Select a date\", datetime.now())\n",
-        "            st.write(f\"Selected date: {date_selected}\")\n",
-        "\n",
-        "    # Additional: Rewards System for Kids (Placeholder)\n",
-        "    with st.sidebar.expander(\"Rewards System\"):\n",
-        "        if st.session_state.tasks.shape[0] > 0:\n",
-        "            completed_tasks = st.session_state.tasks[st.session_state.tasks[\"Status\"] == \"Completed\"]\n",
-        "            if len(completed_tasks) > 0:\n",
-        "                st.write(f\"Number of tasks completed: {len(completed_tasks)}\")\n",
-        "                st.write(\"Rewards can be set based on the number of completed tasks.\")\n"
-      ]
-    }
-  ]
+# Set page configuration
+st.set_page_config(page_title="Family Tree Planner", layout="wide")
+
+# Add custom CSS for styling
+st.markdown("""
+<style>
+.header {
+    font-size: 2em;
+    color: #FF6347;
+    text-align: center;
 }
+.container {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Title of the app
+st.title('Family Tree Planner')
+
+# User credentials (in a real app, store securely)
+USER_CREDENTIALS = {"parent1": "password1", "parent2": "password2"}
+
+# Function to handle login
+def login(username, password):
+    return USER_CREDENTIALS.get(username) == password
+
+# Login section
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    st.sidebar.title("Login")
+    username = st.sidebar.text_input("Username")
+    password = st.sidebar.text_input("Password", type="password")
+    if st.sidebar.button("Login"):
+        if login(username, password):
+            st.session_state.logged_in = True
+            st.sidebar.success("Logged in successfully!")
+        else:
+            st.sidebar.error("Invalid username or password")
+else:
+    st.sidebar.success("You are logged in!")
+
+    # Initialize session state DataFrames if they do not exist
+    if 'tasks' not in st.session_state:
+        st.session_state.tasks = pd.DataFrame(columns=["Task", "Priority", "Status", "Assigned To"])
+    if 'chores' not in st.session_state:
+        st.session_state.chores = pd.DataFrame(columns=["Chore", "Assigned To"])
+    if 'meals' not in st.session_state:
+        st.session_state.meals = pd.DataFrame(columns=["Meal", "Day"])
+
+    # Sidebar for navigation
+    st.sidebar.title("Navigation")
+    option = st.sidebar.selectbox(
+        "Select a section:",
+        ["Home", "Household Chores", "Meal Plan", "Daily Tasks", "Health Monitor", "Calendar"]
+    )
+
+    # Main content based on selected option
+    if option == "Home":
+        st.header("Welcome to the Family Tree Planner")
+        st.write("Manage your family's daily routines, meals, tasks, and more.")
+
+    elif option == "Household Chores":
+        with st.expander("Household Chores"):
+            st.header("Household Chores")
+            with st.form(key='chores_form'):
+                chore = st.text_input("Chore Description")
+                assigned_to = st.text_input("Assign To")
+                submit_button = st.form_submit_button("Add Chore")
+                if submit_button:
+                    st.session_state.chores = st.session_state.chores.append({"Chore": chore, "Assigned To": assigned_to}, ignore_index=True)
+                    st.write(f"Chore Added: {chore} for {assigned_to}")
+            st.dataframe(st.session_state.chores)
+
+    elif option == "Meal Plan":
+        with st.expander("Meal Plan"):
+            st.header("Meal Plan")
+            with st.form(key='meal_form'):
+                meal = st.text_input("Meal Description")
+                day = st.text_input("Day of the Week")
+                submit_button = st.form_submit_button("Add Meal")
+                if submit_button:
+                    st.session_state.meals = st.session_state.meals.append({"Meal": meal, "Day": day}, ignore_index=True)
+                    st.write(f"Meal Added: {meal} for {day}")
+            st.dataframe(st.session_state.meals)
+
+    elif option == "Daily Tasks":
+        with st.expander("Daily Tasks"):
+            st.header("Daily Tasks")
+            with st.form(key='tasks_form'):
+                task = st.text_input("Task Description")
+                priority = st.slider("Priority", 1, 10)
+                assigned_to = st.text_input("Assign To")
+                status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
+                submit_button = st.form_submit_button("Add Task")
+                if submit_button:
+                    st.session_state.tasks = st.session_state.tasks.append({
+                        "Task": task, 
+                        "Priority": priority, 
+                        "Status": status, 
+                        "Assigned To": assigned_to
+                    }, ignore_index=True)
+                    st.write(f"Task Added: {task} with Priority {priority} for {assigned_to}")
+            st.dataframe(st.session_state.tasks)
+
+    elif option == "Health Monitor":
+        with st.expander("Health Monitor"):
+            st.header("Health Monitor")
+            st.write("Health monitoring features will be here.")
+
+    elif option == "Calendar":
+        with st.expander("Calendar"):
+            st.header("Calendar")
+            st.write(f"Today's date: {datetime.now().strftime('%Y-%m-%d')}")
+            date_selected = st.date_input("Select a date", datetime.now())
+            st.write(f"Selected date: {date_selected}")
+
+    # Additional: Rewards System for Kids (Placeholder)
+    with st.sidebar.expander("Rewards System"):
+        if st.session_state.tasks.shape[0] > 0:
+            completed_tasks = st.session_state.tasks[st.session_state.tasks["Status"] == "Completed"]
+            if len(completed_tasks) > 0:
+                st.write(f"Number of tasks completed: {len(completed_tasks)}")
+                st.write("Rewards can be set based on the number of completed tasks.")
