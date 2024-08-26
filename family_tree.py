@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from datetime import datetime
 
 # Set page configuration
@@ -31,9 +32,6 @@ if not st.session_state.logged_in:
 else:
     st.sidebar.success("You are logged in!")
 
-    # Debugging statement to confirm successful login
-    st.write("Login successful, displaying main content...")
-
     # Sidebar for navigation
     st.sidebar.title("Navigation")
     option = st.sidebar.selectbox(
@@ -41,8 +39,15 @@ else:
         ["Home", "Household Chores", "Meal Plan", "Daily Tasks", "Health Monitor", "Calendar"]
     )
 
-    # Debugging statement to confirm selected option
-    st.write(f"Selected option: {option}")
+    # Initialize session state DataFrames if they do not exist
+    if 'tasks' not in st.session_state:
+        st.session_state.tasks = pd.DataFrame(columns=["Task", "Priority", "Status", "Assigned To"])
+
+    if 'chores' not in st.session_state:
+        st.session_state.chores = pd.DataFrame(columns=["Chore", "Assigned To"])
+
+    if 'meals' not in st.session_state:
+        st.session_state.meals = pd.DataFrame(columns=["Meal", "Day"])
 
     # Main content based on selected option
     if option == "Home":
@@ -57,8 +62,6 @@ else:
                 assigned_to = st.text_input("Assign To")
                 submit_button = st.form_submit_button("Add Chore")
                 if submit_button:
-                    if 'chores' not in st.session_state:
-                        st.session_state.chores = pd.DataFrame(columns=["Chore", "Assigned To"])
                     st.session_state.chores = st.session_state.chores.append({"Chore": chore, "Assigned To": assigned_to}, ignore_index=True)
                     st.write(f"Chore Added: {chore} for {assigned_to}")
             st.dataframe(st.session_state.chores)
@@ -71,8 +74,6 @@ else:
                 day = st.text_input("Day of the Week")
                 submit_button = st.form_submit_button("Add Meal")
                 if submit_button:
-                    if 'meals' not in st.session_state:
-                        st.session_state.meals = pd.DataFrame(columns=["Meal", "Day"])
                     st.session_state.meals = st.session_state.meals.append({"Meal": meal, "Day": day}, ignore_index=True)
                     st.write(f"Meal Added: {meal} for {day}")
             st.dataframe(st.session_state.meals)
@@ -87,8 +88,6 @@ else:
                 status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
                 submit_button = st.form_submit_button("Add Task")
                 if submit_button:
-                    if 'tasks' not in st.session_state:
-                        st.session_state.tasks = pd.DataFrame(columns=["Task", "Priority", "Status", "Assigned To"])
                     st.session_state.tasks = st.session_state.tasks.append({
                         "Task": task, 
                         "Priority": priority, 
