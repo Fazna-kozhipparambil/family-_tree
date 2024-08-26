@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-import streamlit as st
+
 
 # Add custom CSS for styling
 st.markdown("""
@@ -54,12 +54,8 @@ else:
     
     # Title of the app
     st.title('Family Tree')
-    import streamlit as st
+    
 from datetime import datetime
-import pandas as pd
-
-# Title
-st.title("Family Tree Planner")
 
 # Sidebar for navigation
 st.sidebar.title("Navigation")
