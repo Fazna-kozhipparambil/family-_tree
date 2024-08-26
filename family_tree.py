@@ -31,13 +31,9 @@ if not st.session_state.logged_in:
             st.sidebar.error("Invalid username or password")
 else:
     st.sidebar.success("You are logged in!")
-
-    # Sidebar for navigation
-    st.sidebar.title("Navigation")
-    option = st.sidebar.selectbox(
-        "Select a section:",
-        ["Home", "Household Chores", "Meal Plan", "Daily Tasks", "Health Monitor", "Calendar"]
-    )
+    
+# Visualization Selection
+viz_selection = st.sidebar.selectbox["Home", "Household Chores", "Meal Plan", "Daily Tasks", "Health Monitor", "Calendar"]
 
     # Initialize session state DataFrames if they do not exist
     if 'tasks' not in st.session_state:
@@ -50,11 +46,11 @@ else:
         st.session_state.meals = pd.DataFrame(columns=["Meal", "Day"])
 
     # Main content based on selected option
-    if option == "Home":
+    if viz_selection == "Home":
         st.header("Welcome to the Family Tree Planner")
         st.write("Manage your family's daily routines, meals, tasks, and more.")
 
-    elif option == "Household Chores":
+    elif viz_selection == "Household Chores":
         with st.expander("Household Chores"):
             st.header("Household Chores")
             with st.form(key='chores_form'):
@@ -66,7 +62,7 @@ else:
                     st.write(f"Chore Added: {chore} for {assigned_to}")
             st.dataframe(st.session_state.chores)
 
-    elif option == "Meal Plan":
+    elif viz_selection == "Meal Plan":
         with st.expander("Meal Plan"):
             st.header("Meal Plan")
             with st.form(key='meal_form'):
@@ -78,7 +74,7 @@ else:
                     st.write(f"Meal Added: {meal} for {day}")
             st.dataframe(st.session_state.meals)
 
-    elif option == "Daily Tasks":
+    elif viz_selection == "Daily Tasks":
         with st.expander("Daily Tasks"):
             st.header("Daily Tasks")
             with st.form(key='tasks_form'):
@@ -97,13 +93,13 @@ else:
                     st.write(f"Task Added: {task} with Priority {priority} for {assigned_to}")
             st.dataframe(st.session_state.tasks)
 
-    elif option == "Health Monitor":
+    elif viz_selection == "Health Monitor":
         with st.expander("Health Monitor"):
             st.header("Health Monitor")
             st.write("Health monitoring features will be here.")
             # Add any health monitoring code or placeholders here
 
-    elif option == "Calendar":
+    elif viz_selection == "Calendar":
         with st.expander("Calendar"):
             st.header("Calendar")
             st.write(f"Today's date: {datetime.now().strftime('%Y-%m-%d')}")
